@@ -2,16 +2,41 @@
 
 @section('content')
 <div class="container">
-    <h1>Oikia Business</h1>
-    <ul class="list-unstyled">
-        <li class="mt-2"><a href="{{ route('appointments.index') }}" class="btn btn-primary">Ver Citas</a></li>
-        <li class="mt-2"><a href="{{ route('appointments.create') }}" class="btn btn-primary">Crear Cita</a></li>
-        <li class="mt-2"><a href="{{ route('workers.index') }}" class="btn btn-primary">Ver Trabajadores</a></li>
-        <li class="mt-2"><a href="{{ route('workers.create') }}" class="btn btn-primary">Crear Trabajador</a></li>
-        <li class="mt-2"><a href="{{ route('branches.index') }}" class="btn btn-primary">Ver Sucursales</a></li>
-        <li class="mt-2"><a href="{{ route('branches.create') }}" class="btn btn-primary">Crear Sucursal</a></li>
-        <li class="mt-2"><a href="{{ route('companies.index') }}" class="btn btn-primary">Ver Empresas</a></li>
-        <li class="mt-2"><a href="{{ route('companies.create') }}" class="btn btn-primary">Crear Empresa</a></li>
-    </ul>
+    <h1>Lista de Trabajadores</h1>
+
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <a href="{{ route('workers.create', ['company' => $company->id]) }}" class="btn btn-primary">Crear Nuevo Trabajador</a>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo Electrónico</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($workers as $worker)
+                <tr>
+                    <td>{{ $worker->name }}</td>
+                    <td>{{ $worker->email }}</td>
+                    <td>
+                        <a href="{{ route('workers.show', ['company' => $company->id, 'worker' => $worker->id]) }}" class="btn btn-info">Ver</a>
+                        <a href="{{ route('workers.edit', ['company' => $company->id, 'worker' => $worker->id]) }}" class="btn btn-warning">Editar</a>
+                        <form action="{{ route('workers.destroy', ['company' => $company->id, 'worker' => $worker->id]) }}" method="POST" style="display:inline-block;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>
 @endsection

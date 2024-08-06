@@ -10,9 +10,9 @@
         </div>
     @endif
 
-    <a href="{{ route('workers.create') }}" class="btn btn-primary">Crear Nuevo Trabajador</a>
+    <a href="{{ route('workers.create', ['company' => $company->id]) }}" class="btn btn-primary">Crear Nuevo Trabajador</a>
 
-    <table class="table">
+    <table class="table mt-4">
         <thead>
             <tr>
                 <th>Nombre</th>
@@ -26,9 +26,9 @@
                     <td>{{ $worker->name }}</td>
                     <td>{{ $worker->email }}</td>
                     <td>
-                        <a href="{{ route('workers.show', $worker->id) }}" class="btn btn-info">Ver</a>
-                        <a href="{{ route('workers.edit', $worker->id) }}" class="btn btn-warning">Editar</a>
-                        <form action="{{ route('workers.destroy', $worker->id) }}" method="POST" style="display:inline-block;">
+                        <a href="{{ route('workers.show', ['company' => $company->id, 'worker' => $worker->id]) }}" class="btn btn-info">Ver</a>
+                        <a href="{{ route('workers.edit', ['company' => $company->id, 'worker' => $worker->id]) }}" class="btn btn-warning">Editar</a>
+                        <form action="{{ route('workers.destroy', ['company' => $company->id, 'worker' => $worker->id]) }}" method="POST" style="display:inline-block;">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger">Eliminar</button>

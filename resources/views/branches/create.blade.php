@@ -14,18 +14,16 @@
         </div>
     @endif
 
-    <form action="{{ route('branches.store') }}" method="POST">
+    <form action="{{ route('companies.branches.store', $company) }}" method="POST">
         @csrf
         <div class="form-group">
             <label for="company_id">Empresa</label>
             <select class="form-control" id="company_id" name="company_id" required>
-                @foreach($companies as $company)
-                    <option value="{{ $company->id }}">{{ $company->name }}</option>
-                @endforeach
+                <option value="{{ $company->id }}">{{ $company->name }}</option>
             </select>
         </div>
         <div class="form-group">
-            <label for="admin_id">Administrador</label>
+            <label for="admin_id">Administrador de Sede</label>
             <select class="form-control" id="admin_id" name="admin_id" required>
                 @foreach($admins as $admin)
                     <option value="{{ $admin->id }}">{{ $admin->name }}</option>
@@ -35,6 +33,10 @@
         <div class="form-group">
             <label for="name">Nombre de la Sucursal</label>
             <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" class="form-control" id="email" name="email" required>
         </div>
         <button type="submit" class="btn btn-primary">Crear</button>
     </form>

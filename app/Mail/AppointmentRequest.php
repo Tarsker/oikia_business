@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -31,6 +30,7 @@ class AppointmentRequest extends Mailable
     {
         return new Envelope(
             subject: 'Appointment Request',
+            to: env('ADMIN_EMAIL') // Asegúrate de pasar un string, no un array
         );
     }
 

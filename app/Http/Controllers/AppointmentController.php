@@ -3,97 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\Branch;
+use App\Models\Product;
 use App\Models\User;
-use App\Models\Branch; // Asegúrate de incluir el modelo Branch
 use Illuminate\Http\Request;
-use App\Notifications\AppointmentConfirmation;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\AppointmentRequest;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Company $company, Branch $branch)
     {
-        $appointments = Appointment::all();
-        return view('appointments.index', compact('appointments'));
+        $appointments = Appointment::where('branch_id', $branch->id)->get();
+        return view('appointments.index', compact('appointments', 'branch', 'company'));
     }
 
-    public function create()
+    public function create(Company $company, Branch $branch)
     {
-        $workers = User::where('role', 'worker')->get();
-        $branches = Branch::all(); // Obtener todas las sucursales
-        return view('appointments.create', compact('workers', 'branches'));
+        $products = Product::where('company_id', $branch->company_id)->get();
+        $workers = User::where('company_id', $branch->company_id)->where('role', 'worker')->get();
+        return view('appointments.create', compact('branch', 'products', 'workers', 'company'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, Company $company, Branch $branch)
     {
         $request->validate([
-            'worker_id' => 'required|exists:users,id',
+            'description' => 'required|string|max:255',
             'appointment_date' => 'required|date',
-            'branch_id' => 'required|exists:branches,id' // Validar que branch_id exista
+            'worker_id' => 'required|exists:users,id',
+            'product_id' => 'required|exists:products,id',
         ]);
 
-        $appointment = new Appointment();
-        $appointment->appointment_date = $request->appointment_date;
-        $appointment->worker_id = $request->worker_id;
-        $appointment->status = 'pending';
-        $appointment->user_id = auth()->id(); // Asignar el ID del usuario autenticado
-        $appointment->branch_id = $request->branch_id; // Asignar la sucursal
-        $appointment->save();
-
-        // Enviar notificación al administrador
-        $this->sendAdminNotification($appointment);
-
-        return redirect()->route('appointments.index')->with('success', 'Cita creada correctamente.');
-    }
-
-    public function show(Appointment $appointment)
-    {
-        return view('appointments.show', compact('appointment'));
-    }
-
-    public function edit(Appointment $appointment)
-    {
-        $appointment->appointment_date = \Carbon\Carbon::parse($appointment->appointment_date);
-        $workers = User::where('role', 'worker')->get();
-        $branches = Branch::all(); // Obtener todas las sucursales
-        return view('appointments.edit', compact('appointment', 'workers', 'branches'));
-    }
-
-    public function update(Request $request, Appointment $appointment)
-    {
-        $request->validate([
-            'worker_id' => 'required|exists:users,id',
-            'appointment_date' => 'required|date',
-            'branch_id' => 'required|exists:branches,id' // Validar que branch_id exista
+        Appointment::create([
+            'description' => $request->description,
+            'appointment_date' => $request->appointment_date,
+            'branch_id' => $branch->id,
+            'worker_id' => $request->worker_id,
+            'product_id' => $request->product_id,
+            'company_id' => $branch->company_id,
+            'user_id' => auth()->id(),
         ]);
 
-        $appointment->appointment_date = $request->appointment_date;
-        $appointment->worker_id = $request->worker_id;
-        $appointment->branch_id = $request->branch_id; // Actualizar la sucursal
-        $appointment->status = 'confirmed';
-        $appointment->save();
-
-        // Enviar notificación al usuario
-        if ($appointment->user) {
-            $appointment->user->notify(new AppointmentConfirmation($appointment));
-        }
-
-        return redirect()->route('appointments.index')->with('success', 'Cita actualizada correctamente.');
-    }
-
-    public function destroy(Appointment $appointment)
-    {
-        $appointment->delete();
-
-        return redirect()->route('appointments.index')->with('success', 'Cita eliminada correctamente.');
-    }
-
-    // Agrega esta función para enviar el correo al administrador
-    public function sendAdminNotification(Appointment $appointment)
-    {
-        $adminEmail = env('ADMIN_EMAIL');
-        Mail::to($adminEmail)->send(new AppointmentRequest($appointment));
+        return redirect()->route('companies.appointments.index', ['company' => $company->id, 'branch' => $branch->id])->with('success', 'Cita creada correctamente.');
     }
 }

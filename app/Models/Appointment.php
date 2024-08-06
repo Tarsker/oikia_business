@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Appointment extends Model
 {
@@ -14,8 +15,11 @@ class Appointment extends Model
         'worker_id',
         'status',
         'user_id',
-        'branch_id' // Asegúrate de incluir 'branch_id' en los campos rellenables
+        'branch_id',
+        'company_id'
     ];
+
+    protected $dates = ['appointment_date'];
 
     public function worker()
     {
